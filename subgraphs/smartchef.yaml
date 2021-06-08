@@ -2,27 +2,29 @@ specVersion: 0.0.2
 description: PancakeSwap is a decentralized protocol for automated token exchange on Binance Smart Chain.
 repository: https://github.com/pancakeswap
 schema:
-  file: ./pairs.graphql
+  file: ./smartchef.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Factory
+    name: SmartChefFactory
     network: bsc
     source:
-      address: '0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73'
-      abi: Factory
-      startBlock: 6809737
+      address: '0x927158Be21Fe3D4da7E96931bb27Fd5059A8CbC2'
+      abi: SmartChefFactory
+      startBlock: 7151302
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
-      file: ../src/pairs/factory.ts
+      file: ../src/smartchef/factory.ts
       entities:
         - Factory
-        - Pair
+        - SmartChef
         - Token
       abis:
-        - name: Factory
-          file: ../abis/Factory.json
+        - name: SmartChefFactory
+          file: ../abis/SmartChefFactory.json
+        - name: SmartChef
+          file: ../abis/SmartChef.json
         - name: BEP20
           file: ../abis/BEP20.json
         - name: BEP20NameBytes
@@ -30,5 +32,5 @@ dataSources:
         - name: BEP20SymbolBytes
           file: ../abis/BEP20SymbolBytes.json
       eventHandlers:
-        - event: PairCreated(indexed address,indexed address,address,uint256)
-          handler: handlePairCreated
+        - event: NewSmartChefContract(indexed address)
+          handler: handleNewSmartChefContract
