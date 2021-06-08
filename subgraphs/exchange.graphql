@@ -1,11 +1,9 @@
 type PancakeFactory @entity {
+  # factory address
   id: ID!
 
-  "Total of pairs"
-  totalPairs: BigInt!
-
-  "Total of transactions"
-  totalTransactions: BigInt!
+  # pair info
+  pairCount: Int!
 
   # total volume
   totalVolumeUSD: BigDecimal!
@@ -17,24 +15,22 @@ type PancakeFactory @entity {
   # total liquidity
   totalLiquidityUSD: BigDecimal!
   totalLiquidityBNB: BigDecimal!
-}
 
-type Bundle @entity {
-  id: ID!
-
-  "BNB price, in USD"
-  bnbPrice: BigDecimal!
+  # transactions
+  txCount: BigInt!
 }
 
 type Token @entity {
+  # token address
   id: ID!
 
-  "Name"
-  name: String!
-  "Symbol"
+  # mirrored from the smart contract
   symbol: String!
-  "Decimals"
+  name: String!
   decimals: BigInt!
+
+  # used for other stats like marketcap
+  totalSupply: BigInt!
 
   # token specific volume
   tradeVolume: BigDecimal!
@@ -42,14 +38,13 @@ type Token @entity {
   untrackedVolumeUSD: BigDecimal!
 
   # transactions across all pairs
-  totalTransactions: BigInt!
+  txCount: BigInt!
 
   # liquidity across all pairs
   totalLiquidity: BigDecimal!
 
   # derived prices
   derivedBNB: BigDecimal
-  derivedUSD: BigDecimal
 
   # derived fields
   tokenDayData: [TokenDayData!]! @derivedFrom(field: "token")
@@ -60,9 +55,8 @@ type Token @entity {
 }
 
 type Pair @entity {
+  # pair address
   id: ID!
-
-  name: String!
 
   # mirrored from the smart contract
   token0: Token!
@@ -84,10 +78,11 @@ type Pair @entity {
   volumeToken1: BigDecimal!
   volumeUSD: BigDecimal!
   untrackedVolumeUSD: BigDecimal!
-  totalTransactions: BigInt!
+  txCount: BigInt!
 
-  block: BigInt!
-  timestamp: BigInt!
+  # creation stats
+  createdAtTimestamp: BigInt!
+  createdAtBlockNumber: BigInt!
 
   # derived fields
   pairHourData: [PairHourData!]! @derivedFrom(field: "pair")
@@ -97,9 +92,8 @@ type Pair @entity {
 }
 
 type Transaction @entity {
-  id: ID!
-
-  block: BigInt!
+  id: ID! # txn hash
+  blockNumber: BigInt!
   timestamp: BigInt!
   # This is not the reverse of Mint.transaction; it is only used to
   # track incomplete mints (similar for burns and swaps)
@@ -180,9 +174,15 @@ type Swap @entity {
   amountUSD: BigDecimal!
 }
 
+# stores for USD calculations
+type Bundle @entity {
+  id: ID!
+  bnbPrice: BigDecimal! # price of BNB usd
+}
+
+# Data accumulated and condensed into day stats for all of Pancake
 type PancakeDayData @entity {
   id: ID! # timestamp rounded to current day by dividing by 86400
-
   date: Int!
 
   dailyVolumeBNB: BigDecimal!
@@ -194,12 +194,11 @@ type PancakeDayData @entity {
   totalVolumeUSD: BigDecimal! # Accumulate at each trade, not just calculated off whatever totalVolume is. making it more accurate as it is a live conversion
   totalLiquidityUSD: BigDecimal!
 
-  totalTransactions: BigInt!
+  txCount: BigInt!
 }
 
 type PairHourData @entity {
   id: ID!
-
   hourStartUnix: Int! # unix timestamp for start of hour
   pair: Pair!
 
@@ -220,9 +219,9 @@ type PairHourData @entity {
   hourlyTxns: BigInt!
 }
 
+# Data accumulated and condensed into day stats for each exchange
 type PairDayData @entity {
   id: ID!
-
   date: Int!
   pairAddress: Bytes!
   token0: Token!
@@ -247,7 +246,6 @@ type PairDayData @entity {
 
 type TokenDayData @entity {
   id: ID!
-
   date: Int!
   token: Token!
 

@@ -5,8 +5,8 @@ import { BEP20SymbolBytes } from "../../../generated/Factory/BEP20SymbolBytes";
 import { BEP20NameBytes } from "../../../generated/Factory/BEP20NameBytes";
 import { Factory as FactoryContract } from "../../../generated/templates/Pair/Factory";
 
-export let ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
-export let FACTORY_ADDRESS = "0xeedcce959675ae3d8974741e80aaa8244a6e3507";
+export const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
+export const FACTORY_ADDRESS = "0xBCfCcbde45cE874adCB698cC183deBcF17952812";
 
 export let ZERO_BI = BigInt.fromI32(0);
 export let ONE_BI = BigInt.fromI32(1);
@@ -39,18 +39,21 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
   let contract = BEP20.bind(tokenAddress);
   let contractSymbolBytes = BEP20SymbolBytes.bind(tokenAddress);
 
+  // try types string and bytes32 for symbol
   let symbolValue = "unknown";
   let symbolResult = contract.try_symbol();
   if (symbolResult.reverted) {
     let symbolResultBytes = contractSymbolBytes.try_symbol();
     if (!symbolResultBytes.reverted) {
-      if (!isNullBnbValue(symbolResultBytes.value.toHex())) {
+      // for broken pairs that have no symbol function exposed
+      if (!isNullBnbValue(symbolResultBytes.value.toHexString())) {
         symbolValue = symbolResultBytes.value.toString();
       }
     }
   } else {
     symbolValue = symbolResult.value;
   }
+
   return symbolValue;
 }
 
@@ -58,23 +61,37 @@ export function fetchTokenName(tokenAddress: Address): string {
   let contract = BEP20.bind(tokenAddress);
   let contractNameBytes = BEP20NameBytes.bind(tokenAddress);
 
+  // try types string and bytes32 for name
   let nameValue = "unknown";
   let nameResult = contract.try_name();
   if (nameResult.reverted) {
     let nameResultBytes = contractNameBytes.try_name();
     if (!nameResultBytes.reverted) {
-      if (!isNullBnbValue(nameResultBytes.value.toHex())) {
+      // for broken exchanges that have no name function exposed
+      if (!isNullBnbValue(nameResultBytes.value.toHexString())) {
         nameValue = nameResultBytes.value.toString();
       }
     }
   } else {
     nameValue = nameResult.value;
   }
+
   return nameValue;
+}
+
+export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
+  let contract = BEP20.bind(tokenAddress);
+  let totalSupplyValue = null;
+  let totalSupplyResult = contract.try_totalSupply();
+  if (!totalSupplyResult.reverted) {
+    totalSupplyValue = totalSupplyResult as i32;
+  }
+  return BigInt.fromI32(totalSupplyValue as i32);
 }
 
 export function fetchTokenDecimals(tokenAddress: Address): BigInt {
   let contract = BEP20.bind(tokenAddress);
+  // try types uint8 for decimals
   let decimalValue = null;
   let decimalResult = contract.try_decimals();
   if (!decimalResult.reverted) {
