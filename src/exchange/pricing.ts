@@ -3,29 +3,16 @@ import { BigDecimal, Address } from "@graphprotocol/graph-ts/index";
 import { Pair, Token, Bundle } from "../../generated/schema";
 import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD } from "./utils";
 
-const WBNB_ADDRESS = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c";
-const WBNB_BUSD_PAIR = "0x1b96b92314c44b159149f7e0303511fb2fc4774f"; // created block 589414
-const DAI_WBNB_PAIR = "0xf3010261b58b2874639ca2e860e9005e3be5de0b"; // created block 481116
-const USDT_WBNB_PAIR = "0x20bcc3b8a0091ddac2d0bc30f68e6cbb97de59cd"; // created block 648115
+const WBNB_ADDRESS = "0x5545153CCFcA01fbd7Dd11C0b23ba694D9509A6F";
+const WBNB_BUSD_PAIR = "0x3375afF2CAcF683b8FC34807B9443EB32e7Afff6"; // created block 589414
+const USDT_WBNB_PAIR = "0x499B6E03749B4bAF95F9E70EeD5355b138EA6C31"; // created block 648115
 
 export function getBnbPriceInUSD(): BigDecimal {
   // fetch bnb prices for each stablecoin
   let usdtPair = Pair.load(USDT_WBNB_PAIR); // usdt is token0
   let busdPair = Pair.load(WBNB_BUSD_PAIR); // busd is token1
-  let daiPair = Pair.load(DAI_WBNB_PAIR); // dai is token0
 
-  // all 3 have been created
-  if (daiPair !== null && busdPair !== null && usdtPair !== null) {
-    let totalLiquidityBNB = daiPair.reserve1.plus(busdPair.reserve0).plus(usdtPair.reserve1);
-    let daiWeight = daiPair.reserve1.div(totalLiquidityBNB);
-    let busdWeight = busdPair.reserve0.div(totalLiquidityBNB);
-    let usdtWeight = usdtPair.reserve1.div(totalLiquidityBNB);
-    return daiPair.token0Price
-      .times(daiWeight)
-      .plus(busdPair.token1Price.times(busdWeight))
-      .plus(usdtPair.token0Price.times(usdtWeight));
-    // busd and usdt have been created
-  } else if (busdPair !== null && usdtPair !== null) {
+  if (busdPair !== null && usdtPair !== null) {
     let totalLiquidityBNB = busdPair.reserve0.plus(usdtPair.reserve1);
     let busdWeight = busdPair.reserve0.div(totalLiquidityBNB);
     let usdtWeight = usdtPair.reserve1.div(totalLiquidityBNB);
@@ -42,16 +29,11 @@ export function getBnbPriceInUSD(): BigDecimal {
 
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
-  "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c", // WBNB
-  "0xe9e7cea3dedca5984780bafc599bd69add087d56", // BUSD
-  "0x55d398326f99059ff775485246999027b3197955", // USDT
-  "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d", // USDC
-  "0x23396cf899ca06c4472205fc903bdb4de249d6fc", // UST
-  "0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3", // DAI
-  "0x4bd17003473389a42daf6a0a729f6fdb328bbbd7", // VAI
-  "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c", // BTCB
-  "0x2170ed0880ac9a755fd29b2688956bd959f933f8", // WETH
-  "0x250632378e573c6be1ac2f97fcdf00515d0aa91b", // BETH
+  "0x5545153CCFcA01fbd7Dd11C0b23ba694D9509A6F", // WBNB
+  "0x0298c2b32eaE4da002a15f36fdf7615BEa3DA047", // BUSD
+  "0xa71EdC38d189767582C38A3145b5873052c3e47a", // USDT
+  "0x66a79D23E58475D2738179Ca52cd0b41d73f0BEa", // BTCB
+  "0x64FF637fB478863B7468bc97D30a5bF3A428a1fD", // WETH
 ];
 
 // minimum liquidity for price to get tracked
